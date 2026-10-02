@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SOC Investigation Dashboard</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            color: #1f2937;
+        }
+
+        /* -------------------------
+           Dashboard Header
+        ------------------------- */
+
+        .header {
+            background: #111827;
+            color: white;
+            padding: 24px 40px;
+        }
+
+        .header h1 {
+            font-size: 26px;
+            margin-bottom: 6px;
+        }
+
+        .header p {
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        /* -------------------------
+           Main Container
+        ------------------------- */
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* -------------------------
+           Incident Header
+        ------------------------- */
+
+        .incident-header {
+            background: white;
+            border-radius: 10px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .incident-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .incident-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .incident-id {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .badges {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+margin-top:10px;
+        }
+
+.badges .badge + .badge {
+    margin-left: 4px;
+}
+
+        .badge {
+            padding: 7px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .critical {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .open {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .description {
+            margin-top: 18px;
+            color: #4b5563;
+            line-height: 1.6;
+        }
+
+        /* -------------------------
+           Risk Summary
+        ------------------------- */
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+
+        .risk-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 22px;
+        }
+
+        .card-label {
+            color: #6b7280;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .risk-score {
+            font-size: 36px;
+            font-weight: 700;
+            color: #b91c1c;
+        }
+
+        .risk-out-of {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .priority {
+            font-size: 24px;
+            font-weight: 700;
+            color: #b91c1c;
+        }
+
+        .severity {
+            font-size: 24px;
+            font-weight: 700;
+            color: #d97706;
+        }
+
+        /* -------------------------
+           Asset Section
+        ------------------------- */
+
+        .asset-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 22px;
+            margin-bottom: 30px;
+        }
+
+        .asset-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+        }
+
+        .asset-item label {
+            display: block;
+            color: #6b7280;
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .asset-item strong {
+            font-size: 15px;
+        }
+/* -------------------------
+   Timeline
+------------------------- */
+
+.timeline-item {
+    padding: 16px;
+    border-left: 3px solid #374151;
+    margin-bottom: 12px;
+    background: #f9fafb;
+}
+
+.timeline-time {
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 5px;
+}
+
+.timeline-event {
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.timeline-details {
+    font-size: 13px;
+    color: #4b5563;
+}
+
+.timeline-severity {
+    font-weight: 700;
+}
+/* -------------------------
+   Incident Response
+------------------------- */
+
+.response-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  align-items: center;
+
+}
+
+.response-button {
+    border: none;
+    padding: 10px 18px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.investigating {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.resolved {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.escalate {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.analyst-notes h3 {
+    margin-bottom: 10px;
+}
+
+.analyst-notes textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 13px;
+    resize: vertical;
+}
+
+.save-notes-button {
+    margin-top: 10px;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 6px;
+    background: #1f2937;
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.audit-item {
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    background: #f9fafb;
+}
+
+.audit-item strong {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+.audit-item p {
+    margin: 4px 0;
+    font-size: 13px;
+}
+
+.audit-item small {
+    color: #6b7280;
+    font-size: 12px;
+}
+
+        /* -------------------------
+           Responsive
+        ------------------------- */
+
+        @media (max-width: 800px) {
+
+            .incident-top {
+                flex-direction: column;
+            }
+
+            .risk-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .asset-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Dashboard Header -->
+
+    <header class="header">
+        <h1>SOC Investigation Dashboard</h1>
+        <p>Security Operations Center • Incident Investigation Platform</p>
+    </header>
+
+
+    <main class="container">
+
+        <!-- =========================
+             INCIDENT HEADER
+        ========================== -->
+
+        <section class="incident-header">
+
+            <div class="incident-top">
+
+                <div>
+                    <div class="incident-title" id="incidentTitle">
+                        --
+                    </div>
+
+                    <div class="incident-id" id="incidentId">
+                        --
+                    </div>
+                </div>
+
+                <div class="badges">
+
+                    <span class="badge critical">
+                        CRITICAL
+                    </span>
+
+                    <span class="badge open"id="incidentStatus">
+                        --
+                    </span>
+
+                </div>
+
+            </div>
+
+            <p class="description" id="incidentDescription">
+                Multiple failed login attempts were followed by a successful
+    login and suspicious activity on the same workstation.
+</p>
+
+        </section>
+
+
+        <!-- =========================
+             RISK SUMMARY
+        ========================== -->
+
+        <div class="section-title">
+            Risk Summary
+        </div>
+
+        <section class="risk-grid">
+
+            <div class="card">
+
+                <div class="card-label">
+                    Risk Score
+                </div>
+
+                <span class="risk-score" id="riskScore">
+                    --
+                </span>
+
+                <span class="risk-out-of">
+                    / 100
+                </span>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-label">
+                    Priority
+                </div>
+
+                <div class="priority" id="priority">
+                    --
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-label">
+                    Incident Severity
+                </div>
+
+                <div class="severity" id="incidentSeverity">
+                    --
+                </div>
+
+            </div>
+
+        </section>
+<section class="risk-grid">
+
+    <div class="card">
+        <div class="card-label">
+            Total Events
+        </div>
+
+        <div class="priority" id="totalEvents">
+            --
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-label">
+            MITRE Techniques
+        </div>
+
+        <div class="priority" id="mitreTechniques">
+            --
+        </div>
+    </div>
+
+</section>
+
+
+        <!-- =========================
+             ASSET SECTION
+        ========================== -->
+
+        <section class="asset-card">
+
+            <div class="section-title">
+                Affected Asset
+            </div>
+
+            <div class="asset-grid">
+
+                <div class="asset-item">
+                    <label>Asset Name</label>
+                    <strong>WORKSTATION-01</strong>
+                </div>
+
+                <div class="asset-item">
+                    <label>Asset Type</label>
+                    <strong>Workstation</strong>
+                </div>
+
+                <div class="asset-item">
+                    <label>Criticality</label>
+                    <strong>Medium</strong>
+                </div>
+
+                <div class="asset-item">
+                    <label>Owner</label>
+                    <strong>IT Department</strong>
+                </div>
+
+                <div class="asset-item">
+                    <label>Environment</label>
+                    <strong>Internal</strong>
+                </div>
+
+            </div>
+
+        </section>
+
+       <section class="asset-card">
+
+    <div class="section-title">
+        Security Event Timeline
+    </div>
+
+    <div id="timeline">
+        <p>Loading timeline...</p>
+    </div>
+
+</section> 
+
+<section class="asset-card">
+
+    <div class="section-title">
+        Analyst Assessment
+    </div>
+
+    <div class="analyst-section">
+
+        <h3>Why is this incident critical?</h3>
+
+        <p id="priorityReason">
+            Loading assessment...
+        </p>
+
+        <h3>Key Observations</h3>
+
+        <ul id="observations">
+            <li>Loading observations...</li>
+        </ul>
+
+        <h3>Recommended Actions</h3>
+
+        <ul id="recommendedActions">
+            <li>Loading recommended actions...</li>
+        </ul>
+
+        <h3>MITRE ATT&CK Techniques</h3>
+
+        <div id="mitreAssessment">
+            <p>Loading MITRE techniques...</p>
+        </div>
+
+    </div>
+
+</section>
+<section class="asset-card">
+
+    <div class="section-title">
+        Incident Response
+    </div>
+
+    <div class="response-actions">
+
+        <button
+            class="response-button investigating"
+            id="investigatingButton">
+            Mark as Investigating
+        </button>
+
+        <button
+            class="response-button resolved"
+            id="resolvedButton">
+            Mark as Resolved
+        </button>
+
+        <button
+            class="response-button escalate"
+            id="escalateButton">
+            Escalate Incident
+        </button>
+
+    </div>
+
+    <div class="analyst-notes">
+
+        <h3>Analyst Notes</h3>
+
+        <textarea
+            id="analystNotes"
+            rows="5"
+            placeholder="Enter investigation notes..."></textarea>
+
+        <button
+            class="save-notes-button"
+            id="saveNotesButton">
+            Save Notes
+        </button>
+
+    </div>
+
+</section>
+
+
+<section class="asset-card">
+    <div class="section-title">
+        Incident Audit History
+    </div>
+
+    <div id="auditHistory">
+        <p>Loading audit history...</p>
+    </div>
+</section>
+        <!-- Event & MITRE Summary -->
+        <section class="risk-grid">
+
+            <div class="card">
+                <div class="card-label">Total Events</div>
+            
+
+    </main>
+
+    </main>
+<script>
+async function loadIncidentData() {
+
+    try {
+
+        const response = await fetch(
+            "http://127.0.0.1:8000/incidents/1/investigation"
+        );
+
+        const data = await response.json();
+
+        // Incident information
+        document.getElementById("incidentTitle").textContent =
+            data.incident.title;
+
+        document.getElementById("incidentId").textContent =
+            "Incident #" + data.incident.id;
+
+        document.getElementById("incidentStatus").textContent =
+            data.incident.status || "";
+
+document.getElementById("analystNotes").value =
+    data.analyst_notes || "";
+
+
+        // Risk information
+        document.getElementById("riskScore").textContent =
+            data.risk.score;
+
+        document.getElementById("priority").textContent =
+            data.risk.priority;
+
+        document.getElementById("incidentSeverity").textContent =
+            data.incident.severity;
+
+        // Summary
+        document.getElementById("totalEvents").textContent =
+            data.summary.total_events;
+
+        document.getElementById("mitreTechniques").textContent =
+            data.summary.unique_mitre_techniques;
+
+// Timeline
+const timelineContainer =
+    document.getElementById("timeline");
+
+timelineContainer.innerHTML = "";
+
+data.timeline.forEach(event => {
+
+    const item = document.createElement("div");
+
+    item.className = "timeline-item";
+
+    item.innerHTML = `
+        <div class="timeline-time">
+            ${new Date(event.timestamp).toLocaleString()}
+        </div>
+
+        <div class="timeline-event">
+            ${event.event_type}
+        </div>
+
+        <div class="timeline-details">
+            Source: ${event.source}<br>
+            Username: ${event.username || "N/A"}<br>
+            Source IP: ${event.source_ip || "N/A"}<br>
+            Hostname: ${event.hostname || "N/A"}<br>
+            Destination IP: ${event.destination_ip || "N/A"}<br>
+            Severity:
+            <span class="timeline-severity">
+                ${event.severity}
+            </span>
+        </div>
+    `;
+            timelineContainer.appendChild(item);
+        });
+
+
+        // Analyst Assessment
+        const analystResponse = await fetch(
+            "http://127.0.0.1:8000/incidents/1/analyst-summary"
+        );
+
+        const analystData = await analystResponse.json();
+
+        document.getElementById("priorityReason").textContent =
+            analystData.priority_reason;
+
+
+        const observationsContainer =
+            document.getElementById("observations");
+
+        observationsContainer.innerHTML = "";
+
+        analystData.observations.forEach(observation => {
+
+            const li = document.createElement("li");
+
+            li.textContent = observation;
+
+            observationsContainer.appendChild(li);
+
+        });
+
+
+        const actionsContainer =
+            document.getElementById("recommendedActions");
+
+        actionsContainer.innerHTML = "";
+
+        analystData.recommended_actions.forEach(action => {
+
+            const li = document.createElement("li");
+
+            li.textContent = action;
+
+            actionsContainer.appendChild(li);
+
+        });
+
+
+        const mitreContainer =
+            document.getElementById("mitreAssessment");
+
+        mitreContainer.innerHTML = "";
+
+        analystData.mitre_techniques.forEach(technique => {
+
+            const div = document.createElement("div");
+
+            div.innerHTML =
+                "<strong>" +
+                technique.technique_id +
+                "</strong> - " +
+                technique.technique_name;
+
+            div.style.marginBottom = "8px";
+
+            mitreContainer.appendChild(div);
+
+        });
+
+
+       } catch (error) {
+        console.error(error);
+    }
+}
+
+loadIncidentData();
+
+
+// Incident Response Actions
+
+document.getElementById("investigatingButton")
+    .addEventListener("click", async function () {
+
+        const response = await fetch(
+            "http://127.0.0.1:8000/incidents/1/status?status=Investigating",
+            {
+                method: "PUT"
+            }
+        );
+
+        const data = await response.json();
+
+        if (response.ok) {
+            document.getElementById("incidentStatus").textContent =
+                data.status;
+
+            alert("Incident marked as Investigating.");
+        }
+    });
+
+
+document.getElementById("resolvedButton")
+    .addEventListener("click", async function () {
+
+        const response = await fetch(
+            "http://127.0.0.1:8000/incidents/1/status?status=Resolved",
+            {
+                method: "PUT"
+            }
+        );
+
+        const data = await response.json();
+
+        if (response.ok) {
+            document.getElementById("incidentStatus").textContent =
+                data.status;
+
+            alert("Incident marked as Resolved.");
+        }
+    });
+
+document.getElementById("escalateButton")
+    .addEventListener("click", async function () {
+
+        const response = await fetch(
+            "http://127.0.0.1:8000/incidents/1/escalate",
+            {
+                method: "PUT"
+            }
+        );
+
+        const data = await response.json();
+
+        if (response.ok) {
+            alert("Incident escalated successfully.");
+        }
+    });
+
+// Save Analyst Notes
+document.getElementById("saveNotesButton")
+    .addEventListener("click", async function () {
+
+        const notes =
+            document.getElementById("analystNotes").value;
+
+        if (!notes.trim()) {
+            alert("Please enter analyst notes.");
+            return;
+        }
+
+        const response = await fetch(
+            "http://127.0.0.1:8000/incidents/1/notes?notes=" +
+            encodeURIComponent(notes),
+            {
+                method: "PUT"
+            }
+        );
+
+        const data = await response.json();
+
+        if (response.ok) {
+
+            alert("Analyst notes saved successfully.");
+
+            // Refresh incident data
+            loadIncidentData();
+
+            // Refresh audit history
+            loadAuditHistory();
+        }
+    });
+// Load Incident Audit History
+
+async function loadAuditHistory() {
+
+    const response = await fetch(
+        "http://127.0.0.1:8000/incidents/1/audit"
+    );
+
+    const data = await response.json();
+
+    const auditContainer =
+        document.getElementById("auditHistory");
+
+    auditContainer.innerHTML = "";
+
+    if (data.length === 0) {
+        auditContainer.innerHTML =
+            "<p>No audit history available.</p>";
+        return;
+    }
+
+    data.forEach(function (audit) {
+
+        const auditItem =
+            document.createElement("div");
+
+        auditItem.className = "audit-item";
+
+        auditItem.innerHTML = `
+            <strong>${audit.action}</strong>
+            <p>
+                ${audit.old_value || "-"}
+                → 
+                ${audit.new_value || "-"}
+            </p>
+            <small>
+                Performed by: ${audit.performed_by}
+            </small>
+            <br>
+            <small>
+                ${audit.created_at}
+            </small>
+        `;
+
+        auditContainer.appendChild(auditItem);
+    });
+}
+
+loadAuditHistory();
+
+</script>
+  
+
+</body>
+</html>
+
